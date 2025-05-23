@@ -99,6 +99,7 @@ def process_toll_call(tool_call,round_index):
 
 # 打印响应内容
 response = check_weather()
-print(response)
+result_content = response["message"]["content"]
+print(result_content)
 
 
