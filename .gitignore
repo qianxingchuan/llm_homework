@@ -3,3 +3,6 @@
 
 # Python编译缓存目录
 __pycache__/
+
+# api_key_constants.py
+**/api_key_constants.py
