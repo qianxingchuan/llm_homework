@@ -1,6 +1,7 @@
 from typing import override
 import ollama
 from llm_client import LLMClient  # 导入抽象基类
+import json
 
 class OllamaClient(LLMClient):
     """Ollama LLM客户端实现（需Ollama服务已启动）"""
@@ -106,6 +107,9 @@ class OllamaClient(LLMClient):
         :param message: 响应中的message对象（含content字段）
         :return: 是否包含工具调用标记
         """
+        # message 的role = assistant 且 content 包含 <tool> 标签
+        if message.get("role") == "assistant" and "<tool>" in message.get("content", ""):
+            return True
         if not message or "tool_calls" not in message:
             return False
         # 简单判断是否包含工具调用标记
@@ -124,6 +128,20 @@ class OllamaClient(LLMClient):
         """
         if not self.should_process_function_call(message):
             return None
+
+        # 假设tool_calls没有内容，通过content看一下，如果有<tool>标签，则提取其中的json字符串
+        if not message.get("tool_calls"):
+            content = message.get("content", "")
+            start_index = content.find("<tool>") + len("<tool>")
+            end_index = content.find("</tool>")
+            if start_index != -1 and end_index != -1:
+                json_str = content[start_index:end_index].strip()
+                # 尝试解析json字符串
+                try:
+                    return json.loads(json_str)
+                except json.JSONDecodeError:
+                    print("JSON解析错误")
+                    raise Exception("JSON解析错误")
         # 假设tool_calls字段中第一个调用是有效的
         return message["tool_calls"][0]["function"]
     

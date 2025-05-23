@@ -10,7 +10,7 @@ from function_call_processor import function_call_processor
 
 
 # llm_client = dashscope_client.DashscopeClient(api_key=dashscope_secret.get("api_key"))
-llm_client = ollama_client.OllamaClient(model="llama3.2:latest")
+llm_client = ollama_client.OllamaClient(model="qwen2.5-coder:1.5b")
 
 
 def run_conversation(query):
@@ -18,21 +18,6 @@ def run_conversation(query):
         "role": "system",
         "content": """
         你是一个专业的天气助手，仅能处理与天气相关的问题，其他问题需拒绝回答。
-        你可以调用我提供的一些tools，但是必须每次只能让我调用一次，
-        比如：
-        你需要“今天”的值，你可以返回:
-        <tool>
-        {"name":"weather_tools.today","arguments":{}}
-        </tool>
-        你需要“杭州”这个城市对应的locationId，你可以返回：
-        <tool>
-        {"name":"weather_tools.get_location_id_by_city_name","arguments":{"city_name":"杭州"}}
-        </tool>
-        当需要天气的具体信息，可以返回：
-        <tool>
-        {"name": "weather_tools.get_current_weather", "arguments": {"locationId": "101280101", "date": "2025-05-23"}}
-        </tool>
-        我每次只能处理一个tool标签
         """
     }]
     messages.append({"role": "user", "content": query})
@@ -74,7 +59,7 @@ def run_conversation(query):
     return llm_client.fetch_content(message)
 
 
-query_content = "杭州2025年5月23日天气怎么样？"
+query_content = "杭州今天天气怎么样？"
 result = run_conversation(query_content)
 if result:
     print("最终结果:", result)
