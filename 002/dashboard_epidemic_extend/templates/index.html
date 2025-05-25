@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>香港疫情数据可视化大屏</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f1c3c;
+            color: #fff;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+        .chart {
+            background-color: #1a2b50;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            padding: 10px;
+        }
+        .header {
+            grid-column: 1 / 3;
+            text-align: center;
+            padding: 10px;
+        }
+        .title {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        #daily-cases {
+            grid-column: 1 / 3;
+            height: 350px
+        }
+        #district-map {
+            height: 350px;
+        }
+        #risk-distribution {
+            height: 350px
+        }
+        #growth-rate {
+            height: 350px;
+        }
+        #district-ranking {
+            height: 350px
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1 class="title">香港疫情数据可视化大屏</h1>
+            <p>数据更新时间: <span id="update-time"></span></p>
+        </div>
+        
+        <div class="chart" id="daily-cases"></div>
+        <div class="chart" id="district-map"></div>
+        <div class="chart" id="risk-distribution"></div>
+        <div class="chart" id="growth-rate"></div>
+        <div class="chart" id="district-ranking"></div>
+    </div>
+
+    <script>
+        // 初始化所有图表
+        const dailyCasesChart = echarts.init(document.getElementById('daily-cases'));
+        const districtMapChart = echarts.init(document.getElementById('district-map'));
+        const riskDistributionChart = echarts.init(document.getElementById('risk-distribution'));
+        const growthRateChart = echarts.init(document.getElementById('growth-rate'));
+        const districtRankingChart = echarts.init(document.getElementById('district-ranking'));
+
+        // 设置更新时间为当前时间
+        document.getElementById('update-time').textContent = new Date().toLocaleString();
+
+        // 1. 每日新增与累计确诊趋势图
+        fetch('/api/daily_cases')
+            .then(response => response.json())
+            .then(data => {
+                const option = {
+                    title: {
+                        text: '香港每日新增与累计确诊病例趋势',
+                        left: 'center',
+                        textStyle: { color: '#fff' }
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: { type: 'shadow' }
+                    },
+                    legend: {
+                        data: ['新增确诊', '累计确诊'],
+                        textStyle: { color: '#fff' },
+                        top: 30
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: data.dates,
+                        axisLabel: { color: '#ccc' }
+                    },
+                    yAxis: [
+                        {
+                            type: 'value',
+                            name: '新增确诊',
+                            axisLabel: { color: '#ccc' }
+                        },
+                        {
+                            type: 'value',
+                            name: '累计确诊',
+                            axisLabel: { color: '#ccc' }
+                        }
+                    ],
+                    series: [
+                        {
+                            name: '新增确诊',
+                            type: 'bar',
+                            data: data.new_cases,
+                            itemStyle: { color: '#5470c6' }
+                        },
+                        {
+                            name: '累计确诊',
+                            type: 'line',
+                            yAxisIndex: 1,
+                            data: data.total_cases,
+                            itemStyle: { color: '#ee6666' }
+                        }
+                    ]
+                };
+                dailyCasesChart.setOption(option);
+            });
+
+        // 2. 地区疫情热力图 - 使用geoJSON数据
+        Promise.all([
+            fetch('/api/district_distribution').then(res => res.json()),
+            fetch('https://geo.datav.aliyun.com/areas_v3/bound/810000_full.json').then(res => res.json())
+        ]).then(([data, hkGeoJSON]) => {
+            // 注册香港地图
+            echarts.registerMap('HK', hkGeoJSON);
+
+            const option = {
+                title: {
+                    text: '香港各地区现存确诊病例分布',
+                    left: 'center',
+                    textStyle: { color: '#fff' }
+                },
+                tooltip: {
+                    formatter: params => {
+                        return `${params.name}<br/>现存确诊: ${params.value}<br/>累计确诊: ${params.data.total}<br/>每10万人确诊率: ${params.data.rate.toFixed(2)}`;
+                    }
+                },
+                visualMap: {
+                    min: 0,
+                    max: Math.max(...data.map(item => item.value)),
+                    text: ['高', '低'],
+                    realtime: false,
+                    calculable: true,
+                    inRange: {
+                        color: ['#50a3ba', '#eac736', '#d94e5d']
+                    },
+                    textStyle: { color: '#fff' },
+                    left: 'right',
+                    top: 'bottom'
+                },
+                series: [
+                    {
+                        name: '现存确诊',
+                        type: 'map',
+                        map: 'HK',
+                        roam: true,
+                        emphasis: {
+                            label: { show: true }
+                        },
+                        data: data,
+                        nameMap: {
+                            '中西区': '中西区',
+                            '东区': '东区',
+                            '九龙城区': '九龙城区',
+                            '观塘区': '观塘区',
+                            '南区': '南区',
+                            '深水埗区': '深水埗区',
+                            '湾仔区': '湾仔区',
+                            '黄大仙区': '黄大仙区',
+                            '油尖旺区': '油尖旺区',
+                            '离岛区': '离岛区',
+                            '葵青区': '葵青区',
+                            '北区': '北区',
+                            '西贡区': '西贡区',
+                            '沙田区': '沙田区',
+                            '屯门区': '屯门区',
+                            '大埔区': '大埔区',
+                            '荃湾区': '荃湾区',
+                            '元朗区': '元朗区'
+                        },
+                        label: {
+                            show: true,
+                            color: '#fff',
+                            fontSize: 10
+                        }
+                    }
+                ]
+            };
+            districtMapChart.setOption(option);
+        }).catch(error => {
+            console.error('加载地图数据失败:', error);
+            districtMapChart.setOption({
+                title: {
+                    text: '地图数据加载失败',
+                    subtext: '请检查网络连接后刷新页面',
+                    left: 'center',
+                    top: 'center',
+                    textStyle: { color: '#ff4d4f' }
+                }
+            });
+        });
+
+        // 3. 风险等级分布图
+        fetch('/api/risk_distribution')
+            .then(response => response.json())
+            .then(data => {
+                const option = {
+                    title: {
+                        text: '风险等级分布',
+                        left: 'center',
+                        textStyle: { color: '#fff' }
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{a} <br/>{b}: {c} ({d}%)'
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left',
+                        data: data.categories,
+                        textStyle: { color: '#fff' }
+                    },
+                    series: [
+                        {
+                            name: '风险等级',
+                            type: 'pie',
+                            radius: ['50%', '70%'],
+                            avoidLabelOverlap: false,
+                            itemStyle: {
+                                borderRadius: 10,
+                                borderColor: '#1a2b50',
+                                borderWidth: 2
+                            },
+                            label: {
+                                show: false,
+                                position: 'center'
+                            },
+                            emphasis: {
+                                label: {
+                                    show: true,
+                                    fontSize: '18',
+                                    fontWeight: 'bold',
+                                    color: '#fff'
+                                }
+                            },
+                            labelLine: {
+                                show: false
+                            },
+                            data: data.categories.map((category, index) => ({
+                                value: data.values[index],
+                                name: category,
+                                itemStyle: {
+                                    color: ['#67e0e3', '#37a2da', '#fd666d'][index]
+                                }
+                            }))
+                        }
+                    ]
+                };
+                riskDistributionChart.setOption(option);
+            });
+
+        // 4. 增长率变化图
+        fetch('/api/growth_rate')
+            .then(response => response.json())
+            .then(data => {
+                const option = {
+                    title: {
+                        text: '新增确诊病例增长率变化',
+                        left: 'center',
+                        textStyle: { color: '#fff' }
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: { type: 'cross' }
+                    },
+                    legend: {
+                        data: ['增长率', '7日移动平均'],
+                        textStyle: { color: '#fff' },
+                        top: 40
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        top: '20%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: data.dates,
+                        axisLabel: { color: '#ccc' }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                            formatter: '{value}%',
+                            color: '#ccc'
+                        }
+                    },
+                    series: [
+                        {
+                            name: '增长率',
+                            type: 'line',
+                            data: data.growth_rate,
+                            smooth: true,
+                            symbol: 'none',
+                            lineStyle: { color: '#91cc75' },
+                            areaStyle: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                    { offset: 0, color: 'rgba(145, 204, 117, 0.3)' },
+                                    { offset: 1, color: 'rgba(145, 204, 117, 0.1)' }
+                                ])
+                            }
+                        },
+                        {
+                            name: '7日移动平均',
+                            type: 'line',
+                            data: data.moving_avg,
+                            smooth: true,
+                            symbol: 'none',
+                            lineStyle: { color: '#ee6666' }
+                        }
+                    ]
+                };
+                growthRateChart.setOption(option);
+            });
+
+        // 5. 地区确诊率排名图
+        fetch('/api/district_ranking')
+            .then(response => response.json())
+            .then(data => {
+                const option = {
+                    title: {
+                        text: '各地区每10万人确诊率排名',
+                        left: 'center',
+                        textStyle: { color: '#fff' }
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: { type: 'shadow' },
+                        formatter: params => {
+                            return `${params[0].name}<br/>确诊率: ${params[0].value.toFixed(2)}<br/>确诊数: ${data.cases[params[0].dataIndex]}`;
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'value',
+                        axisLabel: { color: '#ccc' }
+                    },
+                    yAxis: {
+                        type: 'category',
+                        data: data.districts,
+                        axisLabel: { color: '#ccc' },
+                        inverse: false
+                    },
+                    series: [
+                        {
+                            name: '每10万人确诊率',
+                            type: 'bar',
+                            data: data.rates,
+                            itemStyle: {
+                                color: params => {
+                                    const colors = ['#c23531', '#2f4554', '#61a0a8', '#d48265', '#91c7ae'];
+                                    return colors[params.dataIndex % colors.length];
+                                }
+                            },
+                            label: {
+                                show: true,
+                                position: 'right',
+                                formatter: '{c}',
+                                color: '#fff'
+                            }
+                        }
+                    ]
+                };
+                districtRankingChart.setOption(option);
+            });
+
+        // 窗口大小变化时重新调整图表大小
+        window.addEventListener('resize', function() {
+            dailyCasesChart.resize();
+            districtMapChart.resize();
+            riskDistributionChart.resize();
+            growthRateChart.resize();
+            districtRankingChart.resize();
+        });
+    </script>
+</body>
+</html>

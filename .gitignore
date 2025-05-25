@@ -4,4 +4,7 @@
 # Python编译缓存目录
 __pycache__/
 
+# idea  临时文件
+.idea/
+
 # api_key_constants.py

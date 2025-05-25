@@ -32,7 +32,7 @@ numpy==1.26.2
 ollama==0.4.8
 openai==1.79.0
 packaging==23.2
-pandas==2.2.3
+pandas==2.2.0
 pillow==11.2.1
 propcache==0.3.1
 pydantic==2.11.4
@@ -56,3 +56,4 @@ tzdata==2025.2
 urllib3==2.4.0
 websocket-client==1.8.0
 yarl==1.20.0
+openpyxl==3.1.2
