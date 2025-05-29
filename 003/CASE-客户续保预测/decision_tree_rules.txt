@@ -1,0 +1,45 @@
+决策树规则
+==================================================
+|--- age <= 29.50
+|   |--- marital_status <= 0.50
+|   |   |--- premium_amount <= 11649.50
+|   |   |   |--- education_level <= 1.50
+|   |   |   |   |--- class: 0
+|   |   |   |--- education_level >  1.50
+|   |   |   |   |--- class: 0
+|   |   |--- premium_amount >  11649.50
+|   |   |   |--- class: 0
+|   |--- marital_status >  0.50
+|   |   |--- marital_status <= 1.50
+|   |   |   |--- education_level <= 2.50
+|   |   |   |   |--- class: 1
+|   |   |   |--- education_level >  2.50
+|   |   |   |   |--- class: 1
+|   |   |--- marital_status >  1.50
+|   |   |   |--- gender <= 0.50
+|   |   |   |   |--- class: 0
+|   |   |   |--- gender >  0.50
+|   |   |   |   |--- class: 0
+|--- age >  29.50
+|   |--- age <= 60.50
+|   |   |--- marital_status <= 0.50
+|   |   |   |--- education_level <= 1.50
+|   |   |   |   |--- class: 1
+|   |   |   |--- education_level >  1.50
+|   |   |   |   |--- class: 1
+|   |   |--- marital_status >  0.50
+|   |   |   |--- age <= 33.50
+|   |   |   |   |--- class: 1
+|   |   |   |--- age >  33.50
+|   |   |   |   |--- class: 1
+|   |--- age >  60.50
+|   |   |--- family_members <= 3.50
+|   |   |   |--- education_level <= 2.50
+|   |   |   |   |--- class: 1
+|   |   |   |--- education_level >  2.50
+|   |   |   |   |--- class: 0
+|   |   |--- family_members >  3.50
+|   |   |   |--- marital_status <= 1.50
+|   |   |   |   |--- class: 1
+|   |   |   |--- marital_status >  1.50
+|   |   |   |   |--- class: 0
