@@ -157,13 +157,86 @@ class InventoryAPI:
                 "success": False,
                 "error": str(e)
             }
+    
+    def get_tools(self):
+        """获取库存API的工具定义，用于大模型function call
+        
+        Returns:
+            list: 工具定义列表，包含总览库存查询和物理库存查询两个工具
+        """
+        return [
+            {
+                "name": "get_overview_inventory",
+                "description": "查询总览库存信息，按SKU和质量状态聚合显示库存数据",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "search_sku": {
+                            "type": "string", 
+                            "description": "货品名称或编码，支持模糊搜索，例如：'苹果'、'APPLE'"
+                        },
+                        "quality": {
+                            "type": "string", 
+                            "description": "质量状态，支持自然语言或枚举值。自然语言：'合格'、'残次'、'待检'；枚举值：'GENIUNE'、'DEFECTIVE'、'GRADE'"
+                        }
+                    },
+                    "required": []
+                }
+            },
+            {
+                "name": "get_physical_inventory", 
+                "description": "查询物理库存信息，显示详细的储位、批次等信息",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "search_sku": {
+                            "type": "string",
+                            "description": "货品名称或编码，支持模糊搜索，例如：'苹果'、'APPLE'"
+                        },
+                        "quality": {
+                            "type": "string",
+                            "description": "质量状态，支持自然语言或枚举值。自然语言：'合格'、'残次'、'待检'；枚举值：'GENIUNE'、'DEFECTIVE'、'GRADE'"
+                        },
+                        "bin_code": {
+                            "type": "string",
+                            "description": "储位编码，精确匹配，例如：'L-01-05'"
+                        },
+                        "area": {
+                            "type": "string", 
+                            "description": "库区编码或名称，支持模糊搜索，例如：'N01'、'冷藏'"
+                        },
+                        "batch_info": {
+                            "type": "object",
+                            "description": "批次信息对象",
+                            "properties": {
+                                "produceDate": {
+                                    "type": "string",
+                                    "description": "生产日期，格式：YYYY-MM-DD"
+                                },
+                                "productionNo": {
+                                    "type": "string", 
+                                    "description": "生产批次号，例如：'D123456'"
+                                }
+                            }
+                        }
+                    },
+                    "required": []
+                }
+            }
+        ]
 
 # 使用示例
 if __name__ == "__main__":
     # 初始化API
     api = InventoryAPI()
     
-    print("=== 总览库存查询示例 ===")
+    # 获取工具定义
+    tools = api.get_tools()
+    print("=== 库存API工具定义 ===")
+    import json
+    print(json.dumps(tools, ensure_ascii=False, indent=2))
+    
+    print("\n=== 总览库存查询示例 ===")
     
     # 示例1: 查询所有苹果的库存概览
     result1 = api.get_overview_inventory(search_sku="苹果", quality="合格")
