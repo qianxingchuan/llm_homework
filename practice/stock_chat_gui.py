@@ -36,7 +36,9 @@ class StockChatGUI:
         """初始化系统消息"""
         self.messages.append({
             "role": "system",
-            "content": "你是一个库存查询助手，能够帮助用户查询库存信息。"
+            "content": """你是一个库存查询助手，能够帮助用户查询库存信息。
+            注意：涉及到库存相关的部分，必须要调用我提供的tools来获得信息。
+            """
         })
         
     def setup_ui(self):
