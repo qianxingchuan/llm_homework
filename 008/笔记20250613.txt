@@ -1,0 +1,190 @@
+LangChain + DeepSeek + Faiss 打造RAG问答
+Function Calling 的灵感就是从LangChain
+
+Q：function call 跟传统编程里面的函数调用有啥区别
+执行起来就是函数
+大模型可以理解函数的description，以及参数的description => LLM就是生成 函数的调用，call a funcation (传入的参数）
+
+https://serpapi.com/users/sign_in
+
+在环境变量中设置 SERPAPI_API_KEY
+
+实际上，我们现在可以在LLM中，直接联网，比如 qwen-turbo中，已经有该功能，设置 enable_search=True
+https://help.aliyun.com/zh/model-studio/use-qwen-by-calling-api?disableWebsiteRedirect=true
+
+taivly search MCP (AI搜索引擎）
+
+Q：怎么用自己公司部署的大模型
+
+Q：serpapi 这个工具的api_key填哪里？
+在环境变量中进行设置
+
+Q：老师我有个问题，近一个月电脑安装的东西越来越多，经常install，实际企业能搞这么多么？
+Python会遇到这个问题，可以用python 虚拟环境
+
+Q：有些大模型自己具有和工具相同的功能，那大模型是自己生成答案呢，还是调工具呢
+我们从大模型的response中，可以看到细节
+如果大模型的回答，会直接放到 content中，role=assistent
+role=function,
+
+Q: 这里不用说明入参和出参的吗？
+
+Q: 换成数据库的话,把写死的那块数据改成连接数据就行了吗？
+是的
+
+Q：为啥我问小米它也回答上来了，没有只限定在特斯拉，没有看到web_search类的工具啊
+qwen-turbo是个大模型，本身知道小米
+
+Q：大模型是更倾向于先用工具，还是先自己回答
+倾向于工具，因为工具是用户定义的。这里可以看到更新鲜的内容，或者说更个性化的内容
+
+Q：如何限制回答只来自工具？
+可以在提示词中限制。
+如果工具回答不了，请回答：我不知道，不要自己尝试进行回答。
+
+Q：那问 Model3 ,不是Model 3,大模型为啥不自己回答，刚才
+可以自己回答，也可以调用工具。
+一般LLM会优先使用工具，因为工具是用户定义的，会有更新鲜的答案
+
+Q：工具中没有答案，会从大模型中回答么
+是的
+
+Q：还有哪些场景要调用工具，现在这个场景不是调用知识库更好
+text2sql，通过执行SQL语句，查询数据库
+模型预测，比如预测某支股票，接下来的价格
+
+Q：如果模型的知识比较老，该怎么更新？
+一般是通过RAG
+
+
+Q：股票这玩意儿真能预测得到吗
+有很多证券公司在做量化交易，比如 华泰证券，研究多因子选股模型，使用了82个因子，进行回归分析，预测股票的价格
+
+Q: search 里面的参数 是大模型分析问题 自己提取的关键词么？ 如果是自己提取的，我们是怎么保证提取关键字是对的。
+是大模型自己提取的
+
+北京天气怎么样？
+weather_tools, 传入的参数  city
+
+Q：老师 我想做个AI团队 比如"AI-A"来替换产品经理 "AI-B"来替换前端开发人员 "AI-C".....
+那么我怎么把这些 A、B、C... 的AI给联系起来 作为一个团队来干活呢
+
+Agent A：产品经理，description，tool
+Agent B：前端人员，description，tool
+
+qwen-agent，
+
+Q：我怎么选择要不要用这个范式呢
+可以在prompt进行说明
+agent是通过LLM来进行自主规划的，LLM是通过prompt进行定义
+
+Q：这个范式有什么缺点？
+消耗token，时间长
+
+Q：这个范式是怎么用的呢？是通过提示词，还是开发大模型时内置好的？
+langchain有内置好的agent，可以直接用
+我们也可以通过提示词来完成该操作
+
+Q：react范式要是rag中有答案还会反复调研吗
+不会
+
+Q：一直没答案,这token不就完蛋了
+...（这个 思考/行动/行动输入/观察 可以重复N次，N最大等于5）
+
+Q：扣子空间就是一直在react吗
+是的
+
+Q：用本地模型的话,这时候就很经济了
+
+Q：是如何判断得到了最终答案的？
+LLM自己来判断
+
+
+回答: 该文本的情感倾向为正面，其中包含3行内容。
+
+[{"name": "张三", "age": "25", "comment": "这个产品很好"}, {"name": "李四", "age": "30", "comment": "服务态度差"}, {"name": "王五", "age": "28", "comment": "性价比高"}]`
+
+Q：name func 是固定的吧
+是的
+
+Q：什么时候使用大模型直接回答， 什么时候使用大模型调用tool上进行回答？
+如果是agent，tool是一个手段，agent可以决定是否使用tool
+不过一般tool的优先级比较高，高于自己回答
+
+Q：工具可以是另外一个大模型吗？
+可以的，工具就是函数，函数里面可以使用LLM
+
+Q：ReAct是模型支持的还是langchain框架支持的
+langchain封装好了 react agent，支持react模式
+ReAct也可以写在 LLM prompt中，让LLM进行这种范式的思考
+
+Q：LLM选择工具时，得到的提示词是什么？是怎么产生的？
+LLM自我对话的过程，在这个对话中，它会询问这些 tools里面是否有适合的，可以用于求解用户的问题
+如果有的话，用哪个，怎么用
+
+Q：函数里面的注释本来就没传给agent吧？删不删掉有啥区别
+删掉之后，是通过变量名称来揣测的
+
+Q：本地部署的话，是不是每次调用工具的返回结果内容也占用上下文长度，多轮react后就超过上下文长度了，上下文长度是根据剩余显存来的吗？ 怎么计算我要准备多少显存？
+占用上下长度
+上下文长度的限制 是基于大模型的上下文的长度限制
+
+显存大小是基于大模型的参数量 https://modelscope.cn/models/Qwen/Qwen3-8B/files
+
+Q：如何理解langchain里面某个模块的调用方法？
+Step1，找到langchain工具箱源文件
+D:\AppData\Local\Programs\Python\Python311\Lib\site-packages\langchain
+Step2，用cursor打开这个文件夹
+提问：帮我查找 langchain.agents.Tool 的定义，如何传入tool中的参数描述
+=====
+from langchain_core.tools import Tool
+from pydantic import BaseModel, Field
+
+class MyToolInput(BaseModel):
+    query: str = Field(..., description="要搜索的内容")
+    top_k: int = Field(5, description="返回的结果数量")
+
+my_tool = Tool(
+    name="search_tool",
+    func=my_search_function,
+    description="根据 query 搜索内容，top_k 控制返回数量。",
+    args_schema=MyToolInput
+)
+
+Q：老师 这门课程全部学完能找个什么样的工作？
+不同工作会有不同的需求，会有不同维度需求：
+1）LangChain, LangGraph 可以搭建工作流 
+2）Text2SQL，ChatBI类型的应用
+3）coze, dify => 全员都可以使用的产品
+4）RAG => 因为企业里面会有很多内部资料
+langchain + deepseek + faiss
+5) AI数据决策 => 量化交易策略，预测场景
+生成式AI，辅助变成
+生成式AI，可以做Chat互动，调用专有工具
+
+Q: 先调用哪个工具 后调用哪个工具 是Agent自己决定的吗？
+是的
+
+@2-network_diagnosis_agent.py 帮我解释代码逻辑，写入到 .md
+
+Q：老师，MCP和agent是什么关系？
+agent是“人”
+MCP是工具（协议）
+
+Q：关于记忆机制，一般是选用哪种？场景是：
+比如改代码。
+有些问题反复很多次，多次调用多个工具，产生很多中间结果，以至于超出LLM提示词窗口。
+ConversionMemory：对对话进行摘要，将摘要存储在内存中，相当于将压缩过的历史对话传递给LLM
+
+Q：LangGraph后面会有课来专门讲解吗
+有的
+
+Q：LCEL这个东西官方不说建议用，现在好像在主推langgraph
+langchain是底座，langgraph是langchain升级
+
+Q：coze我体验过还是可以很牛的，可以帮我根据需求设计出效果图
+coze好上手，coze插件市场上有很多现成的工具，可以直接用
+
+coze = 现成的工具 的 工作流，简单好用
+hiagent
+
