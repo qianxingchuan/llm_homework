@@ -2,6 +2,7 @@ from vanna.openai import OpenAI_Chat
 from vanna.chromadb.chromadb_vector import ChromaDB_VectorStore
 import mysql.connector
 import time
+import os
 from openai import OpenAI
 
 class MyVanna(ChromaDB_VectorStore, OpenAI_Chat):
@@ -25,27 +26,30 @@ class MyVanna(ChromaDB_VectorStore, OpenAI_Chat):
         OpenAI_Chat.__init__(self, config=openai_config)
 
 # 创建OpenAI客户端
+# 从环境变量获取 dashscope 的 API Key
+api_key = 'sk-HsggDrwOjUrq6QYZ6fOLFzoPkK3R8eyHx8gf75YlGA8KiSyq'
 client = OpenAI(
-    api_key='sk-mi9MCut4OAAfY4SUE8a4fCQBLfMZPZpV5an6Ove0PPUSVVBq',
-    base_url='https://chatapi.littlewheat.com/v1'
+    api_key=api_key,
+    base_url='https://api.fe8.cn/v1'
 )
 
 # 初始化Vanna实例
 vn = MyVanna(config={
     'model': 'gpt-4o-mini', 
+    # 'model': 'qwen-max-2025-01-25', 
     'client': client
 })
 
-vn.connect_to_mysql(host='rm-uf6z891lon6dxuqblqo.mysql.rds.aliyuncs.com', 
-                    dbname='action', user='student123', password='student321', port=3306)
+vn.connect_to_mysql(host='192.168.1.4', 
+                    dbname='project-db-001', user='root', password='123456', port=3306)
 
 # 连接到MySQL数据库
 try:
     connection = mysql.connector.connect(
-        host='rm-uf6z891lon6dxuqblqo.mysql.rds.aliyuncs.com',
-        database='action',
-        user='student123',
-        password='student321',
+        host='192.168.1.4',
+        database='project-db-001',
+        user='root',
+        password='123456',
         port=3306
     )
     print("成功连接到MySQL数据库")
