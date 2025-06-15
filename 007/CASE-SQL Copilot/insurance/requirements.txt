@@ -1,0 +1,9 @@
+dashscope==1.22.1
+Faker==20.1.0
+langchain==0.3.25
+openai==1.77.0
+pandas==2.2.3
+Requests==2.32.3
+SQLAlchemy==2.0.23
+transformers==4.49.0
+zhipuai==2.1.5.20250421

@@ -1,0 +1,195 @@
+Q：Agent打卡，生成图片，不显示
+
+https://image.pollinations.ai/prompt/一只小狗
+
+Q：cursor 中问题生成的答案是不是也有经过 rag？
+你的workspace就是个知识库，它会检索里面相关的代码片段，然后进行推理
+
+SQL 要查询数据库：
+1）MySQL
+2）SQLite
+3）postgres
+4）SQL Server
+5）db2
+3）oracle
+
+业务SQL的撰写 => 技术
+
+大模型通过海量的数据训练 => 掌握了写SQL的能力 （github）
+1）闭源
+2）开源
+https://modelscope.cn/models/Qwen/Qwen3-4B
+3）代码大模型
+
+user_id, tag
+
+Trae VS cursor => Cursor更好用，因为cursor可以使用claude，这是一个对代码进行优化的模型
+claude => 直奔主题，马上开始写代码。
+分成多个代码片段。 test1.py, test2.py
+
+deepseek-v3, r1 => chat (希望在一次对话中，完成所有的事）
+
+trae(doubao，deepseek)，Cursor，lingma(Qwen), codebuddy(元宝，deepseek)
+
+https://lingma.aliyun.com/
+
+Q :刚才说的LLM + RAG 比langchain更好么？
+各有优缺点
+langchain 使用起来方便，几行代码就可以 => 不足：个性化程度低
+LLM + RAG => 可以自己来控制，包括选择大模型，RAG，个性化程度高 => 你的工作量会比较大
+vanna （开源工具），专门用于 text2sql的开源工具，做了一定的封装
+
+Tools：sql_db_list_tables
+=> 通过db，连接远端的数据库，查询都有哪些数据表
+
+Action: sql_db_schema
+=> 可以查询指定的数据表的建表语句
+SELECT * from table limit 3
+
+Q：为什么一句简单的话，它就会去调用远端的数据库呢？
+因为大模型可以调用工具， function calling
+在sql agent（langchain中的一个agent）中，封账了一些调用db的工具
+sql_db_list_tables
+sql_db_schema
+
+内置了prompt
+用户的问题是{query}
+我现在看到了数据库有这些表：{table_list}
+===
+我现在要思考，和用户问题相关的表有哪些？
+
+Q：这要是数据表起名起得很怪异，大模型会不会无法理解该查哪张表a
+orders
+=> 说明数据表的名称，起名很重要
+table_a, table_b
+
+Q: 表注释有助于大模型理解吗
+大模型进行推理，主要是看 数据表的名称，字段的名称，metadata的定义，comments =>用于推理
+
+agent_executor.run("描述HeroDetails表")
+deepseek-v3
+我们在用langchain，内置一些prompt：是通过英文Prompt
+
+tools: sql_db_query_checker
+SELECT name, attack_max FROM heros ORDER BY attack_max DESC LIMIT 5
+
+tools: sql_db_query
+
+Q: langchain这个sql agent已经挺好了，人也就是这么查吧？
+1）高度封装，有很多很好用的工具
+2）对于刚开始写SQL，不是很清楚有哪些数据表的同学来说，sql agent就是这么执行的
+
+LLM + RAG
+
+Q: 我hero的表能跑,前一张订单的表跑不了,会报错
+LLM的运行，有时候会有报错，有时候会正常
+
+Q：调用的模型是不是一定要支持function calling才可以用？
+在sql agent中，主要是靠 prompt来完成的；
+
+Q：这个工具能识别不同数据库支持的 sql 函数吗？比如 hive sql 有很多 内置函数
+可以的
+
+Q：langchain agent和 qwen agent比起来哪个更好，国内目前最好用的agent框架是哪个，老师推荐一
+我是喜欢qwen agent => 简单，效果还不错
+langchain, langgraph 代码量如果是300行的话，qwen agent代码量可能只有150行。
+
+Q：这种只是对简单的sql好使吗，多表查询，是不是不好使
+复杂的SQL撰写，错误率肯定会提升
+langchain sql agent可以写复杂的SQL
+
+Q：如果表的数量太多，会不会也影响框架的效果
+是的，框架就不太适合
+
+Q：这里使用deepseek-v3大模型的作用是啥？
+通过Prompt写SQL语句
+
+Q：数据库权限
+是通过用户名 来解决的
+我们对数据库的权限，是针对不同的用户，可以设置不同的权限
+
+
+Q：如果数据量很大，如何保证生成的sql高性能，提示词里有限制用户删表权限吗
+删表权限，我们对用户一般是不给这个权限的
+
+prompt
+写sql的工具
+还有sql的检查工具，sql_db_query_checker （可以语法检查，和安全检查）
+
+Q：如何保证生成的sql高性能
+sql_db_upgrade（可以写个工具，专门对SQL的查询，进行优化的建议）
+检查工具：SQL注入，SQL效率，
+SELECT * FROM policy
+
+sql agent中的SQL工具是在 langchain community/tools/sql_database/tool.py
+
+SELECT p.PolicyNumber, c.Name FROM policyinfo p JOIN customerinfo c ON p.CustomerID = c.CustomerID WHERE p.PremiumPaymentStatus = '未支付' LIMIT 20
+
+SELECT c.Name, c.PhoneNumber, cl.ClaimNumber, cl.ClaimAmount, cl.ClaimDate FROM claiminfo cl JOIN policyinfo p ON cl.PolicyNumber = p.PolicyNumber JOIN customerinfo c ON p.CustomerID = c.CustomerID WHERE cl.ClaimAmount > 10000 LIMIT 10
+
+Q：code代码大模型的本质是什么？
+代码补全
+你写注释，大模型写代码
+
+Q：如果我的数据库的表名不规范,字段comment也有缺失,有什么方式能告诉它每张表的信息
+需要通过RAG的方式，比如数据字典
+
+langchain 已经封装了这些工具，如果你用langchain 你不需要给它建表语句
+
+Q：做一个md文档说明各个字段代表什么，可以吗
+这种方式很好
+
+Q：有10万张表的话 create_sql要10万张都放在“###
+Input: {create_sql}”吗？
+我们需要对10万张表按照业务场景进行拆分
+不同场景下面，肯定数据表会有区别
+在一个场景中，我们需要找到都有哪些相关的表 => 如果表的数量还是很多 => 可以用大宽表
+
+Q：rag 里面的大量创表语句以及字段含义，如何结合大模型提示词生成 sql
+1）固定信息的插入
+2）语义相似度的检索 => 作为上下文的补充
+
+Q：怎么做拆分，在什么阶段做
+在LLM应用开发之前
+1）先确定场景，以及这个场景，要解决什么问题
+2）基于场景，来找数据表
+建议不要给太多的数据表，用于text2sql
+
+Q：大宽表就是 列很多的表
+
+Q:老师 后面真实项目中，是不是都用dify了。老师现在交的这些在dify中都有吗？现在的内容都是能力养成？
+企业一般会部署dify，但是agent 不一定都用dify
+有些他们会agent搭建的开源框架
+langchain, langgraph
+qwen-agent ***
+autogen
+
+dify一般是给业务，快速搭建agent，低代码
+用现成的组件 + LLM，按照工作流的编排，可以快速完成 agent搭建
+
+Q：dify面向业务，agent面向实现？
+dify是一个agent搭建平台，通常给全员来用的
+
+Q：我问了cursor说，qianwenagent主要针对千问大模型的 对其他大模型，需要做改造
+qwen-agent：除了qwen大模型，还可以使用其他大模型
+deepseek-v3, r1
+还支持私有化大模型的调用
+
+pip install vanna[chromadb,ollama,mysql] -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+我们的agent，text2sql只是一种能力，所以我是自己来写prompt + LLM => 执行SQL
+
+如果你想专门做text2sql，专门做chatbi，可以你用vanna
+
+mcp, qwen-agent就要继承mcp
+
+cmd之后，输入 jupyter notebook
+
+
+
+
+
+
+
+
+

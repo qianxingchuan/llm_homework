@@ -1,0 +1,5 @@
+langchain==0.3.25
+openai==1.77.0
+pandas==2.2.3
+qdrant_client==1.14.2
+vanna==0.7.9
