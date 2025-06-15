@@ -7,9 +7,12 @@ import re
 import json
 from typing import List, Union, Dict, Any
 import os
+import dashscope
 
 # 设置通义千问API密钥
-DASHSCOPE_API_KEY = 'sk-882e296067b744289acf27e6e20f3ec0'
+api_key = os.environ.get('DASHSCOPE_APP_KEY')
+DASHSCOPE_API_KEY = api_key
+dashscope.api_key=api_key
 
 # 自定义工具1：文本分析工具
 class TextAnalysisTool:
@@ -192,7 +195,7 @@ def create_tool_chain():
     ]
     
     # 初始化语言模型
-    llm = Tongyi(model_name="qwen-turbo", dashscope_api_key=DASHSCOPE_API_KEY)
+    llm = Tongyi(model_name="qwen-max-2025-01-25", dashscope_api_key=DASHSCOPE_API_KEY)
     
     # 创建提示模板
     prompt = PromptTemplate.from_template(
