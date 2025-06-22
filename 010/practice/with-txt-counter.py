@@ -46,12 +46,18 @@ def init_agent_service():
     
     # MCP 工具配置 - 通过 HTTP 连接到已启动的 MCP 服务器
     tools = [{
-    "mcpServers": {
-        "txt-counter": {
-            "command": "python",
-            "args": ["e:\\code\\llm_homework\\010\\CASE-MCP Demo-1\\txt_counter.py"]
+        "mcpServers": {
+            "txt-counter": {
+                "type":"http",
+                "url":"http://localhost:8080/sse",
+                "headers":{
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "x-mcp-proxy-auth":"Bearer 1e44c421c38d273a4cba0e91588fad5b41615bf27198c5c7ddf898c812f1e15e"
+                },
+                "timeout":30
+            }
         }
-    }
     }]
     
     try:
