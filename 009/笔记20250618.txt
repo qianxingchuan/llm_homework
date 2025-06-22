@@ -1,0 +1,249 @@
+poetry run poe index --root ./cases
+--init，不需要了
+
+Q：感觉function call、mcp tools、langchain里的tools，都是同一个东西
+是的
+
+Q：MCP是不是基于function calling 的能力
+作用是一样的，MCP是通过协议的方式来完成
+HTTP SSE
+
+楼上的不赞成，堵车时候，汽车不能行驶的地方，小电驴和自行车就是最好的
+
+Q：如R1模型原生没有function calling的能力是不是也就没有MCP的能力
+为什么有些大模型，不支持function calling 
+=> 因为大模型，只有语言的理解，没有专门训练function calling能力
+
+Q：老师 function call是各个模型自己的实现，调用方式可能会不一样
+openai和qwen调用function call的写法不太一样
+
+Q：mcp是通过提示词来规定大模型需要外部能力，怎么告诉我们吗
+http
+
+deepseek-R1-0528已经支持function calling
+
+Q：function call调用, 底层是TCP还是http
+大模型的function call调用，是一种推理
+在大模型吐出的token中，写出 调用哪个函数，传入的参数是什么
+get_weather, 传入 location=北京
+
+https://help.aliyun.com/zh/model-studio/models
+qwen-turbo-latest
+
+Q：function call是大模型的功能，还是智能体的功能呢
+大模型具备function call的解析
+
+response.output.choices[0].message= {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "get_current_weather", "arguments": "{\"location\": \"北京\"}"}, "index": 0, "id": "call_3ebfd66ceec747e98af2d8", "type": "function"}]}
+
+Q：我的理解不知道对不对。各个大模型对需要调用外部能力的时候，需要按照指定的格式返回token,agent解析返回的数据进行tool调用。需要大模型和agent配合
+对的
+
+Q：为什么输出role是assistant
+system（系统定义）, user（用户指令）, assistant（助手的回答）
+
+Q：可以理解为agent是个人function call是一个人的某个能力
+agent有function call 工具调用能力
+RAG文件检索能力
+记忆
+
+agent应该是等于llm+tools(function call)+知识
+
+Q:是不是可以理解为使用大模型解析自然语言，生成调用API接口的参数，然后调用API接口？
+是的
+LLM就是自然语言理解的模型，输出一段文字
+以前文字只有聊天，现在文字，还可以告诉如何调用工具
+
+https://lbs.amap.com/
+
+Q：function call是相当于大模型里边儿定义和声明了这个api吗？和我直接调用高德地图的API有什么区别？
+function call就是告诉大模型，我有哪些工具，你需要传入什么参数
+
+Q：function call 调用参数就是个json串么？
+function call给大模型暴露的定义，就是一串json
+
+Q :那只要function call 一样 不同的大模型返回都是一样的结果吧
+是的
+
+Q：和大模型交互的时候，function也会包含在提示词里面吗------这个问题很重要。是要吧tool传进去的，不然大模型不知道
+是的，function的定义，会放到上下文中，让大模型看到
+
+Q：tools是一个数组，如何添加多个function,多个function如何使用？
+
+Q：这个json不是高德的API参数，而是千问里的天气function的参数吗？
+这个是我们自己写的 get_current_weather调用的时候，所需的参数
+
+Q：可以在weather_tool里面也加入高德的api让大模型自己去调用高德api返回结果吗
+
+Q：那我得首先知道高德API要传哪些参数，才能设置weather function吧
+是的
+
+https://lbs.amap.com/api/webservice/guide/api/direction
+
+Thinking：你会撰写一个function，让大模型写SQL
+input：用户的提问
+output：大模型写好的SQL
+LLM prompt:
+以下是用户的提问：{query}
+你还有一些数据表，他们的定义是：{schema_sql}
+请你根据用户的提问，撰写SQL
+
+Step1，agent调用写SQL的工具
+Step2，agent调用执行SQL的工具
+=>
+Step1，agent直接调用执行SQL的工具
+
+LLM更容易读懂SQL，SQL语句更标准
+
+助手就是Agent，你给它目标，它会自己决定怎么完成目标
+Agent里面可以注册工具，调用function call
+
+Qwen-Agent是一个Agent开发框架，一般我们可以使用Assistant这个类；
+
+Agent具备自主规划能力
+workflow是固定的流程
+workA => workB => workC 这个工作流是实现定义好的
+
+如果使用Agent模式?
+B=>C
+
+functionA：天气查询
+functionB：穿衣搭配工具
+问Agent：今天穿什么适合呢？
+可能1：function B
+可能2：function A天气查询 => function B
+
+如果你希望是确定的工作流程 => 需要使用工作流
+针对qwen-agent, 你可以封装一个C
+C = A + B
+
+Q：qwagent和刚才的查询天气dashscope.Generation.call都是FunctionCalling有什么区别呢？
+刚才我们自己写的LLM的 function calling，需要自己编写调用的过程
+qwen-agent已经将tool call的过程写好了，你只要注册function_list 即可
+
+Q：在哪里指定是工作流还是 agent
+qwen-agent是agent开发工具，它不是工作流的安排
+
+Q：如果需要实现多个助手，每个助手一个Qwen-agent的独立服务吗？
+qwen-agent可以有多agent开发模式
+
+Q：它是怎么知道需要调用exc_sql的
+LLM具备function call的语言解析
+exc_sql的定义是文字定义，写入到了 LLM prompt中的上下文
+
+把 agent 当人看，llm 是大脑，function call 是agent使用的工具
+
+Q：qwen-agent能用于其他LLM吗？
+可以调用本地私有化模型，有调用制定的 server url + model名称
+
+Q：封装的UI有没有登录相关功能？或者和其他系统做SSO，然后有记录各人自己的历史？
+这个目前没有
+界面是通过 gradio的工具开发
+
+Q：老师，你这个助手页面是怎么做的，稍微讲一下流程
+qwen-agent 封装调用了gradio工具
+gradio, streamlit
+
+Q:qw-agent能用于其他LLM吗？---
+-----老师，我觉得他想问，对其他llm的function call的格式是否匹配，内置的提示词是否支持
+
+function call的格式，一般有两种，qwen dashscope格式，openai
+
+帮我查找 function call定义，除了dashscope，是否还支持 openai
+
+qwen-agent的能力如何？
+1) 你可以定义多个agent
+2）每个agent可以配备多个function call
+
+Q:路由的原理是什么？也是大模型理解吗
+是的，路由本身就是通过LLM来理解
+    # 定义路由器（同时也是文本助手）
+    bot = Router(
+        llm=llm_cfg,
+        agents=[bot_vl, bot_tool],
+    )
+
+Q：只有qwen有这种agent吗 其他厂商有没
+Agent开发框架有很多，主流的有：
+langchain, langgraph
+qwen-agent
+coze, dify
+
+Q: Langchain，agent，function call 这些比较相似，将来要怎么选？
+你的任务是需要 灵活自主判断，还是固定工作流
+workflow
+input => workA => workB => workC
+
+Agent 自主编排，你把工具给它
+system_prompt 一次性的讲完（包括：需求，你的指令偏好）
+
+qwen-agent，自主 >= workflow
+你可以封装一个工具D （=workA+workB+workC）
+
+Q: 我举个例子，我的客户的需求是做智能审批，他已经有了一个比较成熟的某个业务的审批系统，比较的复杂，需要从多个文档里获取数据，然后根据数据进行审批，
+获取数据这个需求可以用大模型来完成，那么审批的过程要怎么改造，结合大模型来实现呢？
+qwen-agent
+你可以注册很多工具给这个agent，比如 
+toolA = 获取数据
+toolB = 审批工具1
+toolC = 审批工具2
+system_prompt = 一般你需要先获取数据，然后再XXX进行审批
+
+langgraph，代码量相对比较多，维护成本相对高
+
+
+Q：如何把qwen agent嵌入到自己的系统中，变成一种可以并发调用的服务
+可以参考 tui
+
+Q :有什么封装api的框架?把现在的agent封装成api
+flask, fastapi
+
+prompt：
+@assistant_ticket_bot-1.py 我想把用 flask进行封装，用户输入一个query，bot返回一个结果，帮我编写新的 .py
+
+你可以用postman，创建一个访问请求
+通过post方法，访问：http://127.0.0.1:5000/chat
+传入body参数
+{
+    "query": "2023年4、5、6月一日门票、二日门票的销量如何？帮我按照周进行统计"
+}
+
+
+Q：把数据存在数据库·让大模型接着读数据库呢
+可能LLM访问次数多，时间会比较长
+
+Q：有些chatbi会要求把数据按维度和指标进行导入，这个和text2sql的方式有不什么不同吗？
+chatbi这里我们是写了一些规则，说明横坐标一般选择什么，纵坐标选择什么
+
+Q：想输出echarts图是不是更复杂
+是会更复杂
+
+
+这个画图方式太固定了吧。出现刚才的轴密集的问题没办法解决，是不是第一个函数负责存储，第二个函数去读取存储然后大模型绘画呢
+
+Q：前端传入html格式是不是不用先保存图片？
+如果是echarts，不用图片
+
+Q：LLM 访问次数多，还要额外耗费 token 吧？
+是的
+input token + output token
+
+Q:agent服务器部署是需要gpu服务器吗
+调用dashscope API，就不用GPU服务器
+如果你调用本地的私有化大模型，需要GPU
+
+微调的话：
+使用unsloth，准备数据集，<q,a>
+
+prompt => RAG => 微调
+
+Q：如果自定义的工具很多，模型原始的工具调用能力不够，才需要微调。其实把调用规则
+用RAG也可以吧？
+是的
+
+Q：manus 是不是由很多agent串連而成,有可能用那種大模型.或是他們也發展大模型
+是的
+
+Q：通用智能体。。。夸大了。其实就是内置编排
+吸引眼球，是的，主要是工作流，还有一些工具的打造
+
+扣子空间

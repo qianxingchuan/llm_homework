@@ -1,0 +1,6 @@
+dashscope==1.22.1
+pandas==2.3.0
+qwen_agent==0.0.25
+Requests==2.32.4
+SQLAlchemy==2.0.23
+~wen_agent==0.0.19
