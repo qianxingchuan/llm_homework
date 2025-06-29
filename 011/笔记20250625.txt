@@ -1,0 +1,210 @@
+http://reverie.herokuapp.com/arXiv_Demo/#
+
+Agent：开放问题，cursor agent，要解决各种各样的代码问题 （灵活自主）
+A=>B=>C
+A=>C
+
+
+工作流：固定的流程编排，顺序是相对确定的 （固定流程）
+nodeA=> nodeB => nodeC
+
+私募基金的合格投资者标准是什么？
+
+RAG过程：coze 召回5条信息；（向量相似匹配）
+===
+Agent通过调用工具来判断；
+Agent是否可能调用多个工具？调用多次工具？
+tool1 => tool2 
+
+如果我是一个净资产800万元的机构，我能投资私募基金吗？
+
+私募基金可以投资哪些资产类别？
+
+Q：同样的问题，回答不一定每次都一样，是吗？
+针对Agent，会存在这种情况；
+Agent 选择工具，尤其是工具比较多且有重叠的时候；
+
+Q：老师，回答的快慢由哪些因数决定
+1）和LLM调用次数相关；
+调用1次，和调用3次，时间肯定不一样；
+2）prompt长度相关
+
+
+如果每次都向模型重新发请求，大概率会不一样
+
+Q：QA可以用知识库代替吧？
+我们现在是给Agent配备了3个tool，可以不用 tool，而用知识库；
+langchain 和 langgraph
+langgraph是升级版的langchain
+langgraph 和 langchain的作用有重叠，langgraph是官方推荐使用的，后续大概率在langgraph上发力；
+langgraph可以解决更复杂的问题；
+
+Q：要做反应式Agent，哪个响应速度比较快？
+如果只是知识问答，RAG可能最快；
+
+Q：好像可以在提示词里加限制，多少次得不到答案就输出回答不了
+可以限制循环的次数 n不超过5
+
+Q：这算function calling 吗
+LLM + function calling
+Agent + tools
+
+Q：老师有做过情感咨询类的agent嘛
+Coze搭建了一个 黄执中的情绪管理；
+
+Q：可调用的TOOLS范围取决于什么因素？
+我们注册给Agent多少，这些都是可调用的；
+
+Q：响应式编程是新思路。在设计代码的时候需要考虑多个路径。据说学习曲线陡峭
+我的理解是，大家的要求是又要全面，又要快速咯？
+
+快速 = 不耽误时间；不做长思考；
+
+
+
+Q：一轮对话完成不了的任务是不是考虑
+可以做成agent，然后用langchain封装成兼容OpenAI协议的接口，给用户调用
+LangChain是可以做Agent，我们这个就是搭建的 React模式的Agent，让Agent自主规划，选择工具；
+
+Q：老师，有AI 图像 training的Agent吗？现在做图像training，要尝试各种模型，有没有什么Agent可以传入图像，自动推荐最优模型，启动训练
+大模型：多模态，dino
+
+Q：还是没理解agent+tools和LLM+function call有啥区别
+本质上没啥区别；
+最早tool调用，是langchain提出来的；
+OpenAI看到很有价值，就给LLM做了一个标配，即function call能力；
+
+Agent + tools + 提示词模版 + memory + chain
+
+Graph = <Node, Edge>
+
+
+Q：代码里没有用router 吧
+有router
+
+每一个 LangGraph，都有一个State，记录了整个LangGraph所需要的全局信息
+
+Q：什么场景用langgraph，什么场景用langchain？
+langgraph是一个图 = <node, edge> 即包括了线性的关系，也包括了图的关系
+langchain 是一个线性的关系；nodeA | nodeB | nodeC
+
+Q：线性关系是啥意思？就是只有一个路径吗
+没有环的，一个顺序执行的逻辑
+
+Q：这个工作流上每个节点角色都是对等的么？
+独立的；
+
+Q：用graph方式会不会出现死循环啊？
+可能会形成一个圈 => 容易死循环；
+end
+
+LangChain, LangGraph
+1）代码量相对是比较多的，约等于 Qwen-Agent 的2倍；
+2）更灵活，更底层的搭建 workflow
+
+
+
+[DEBUG] 进入节点: assess_query
+[DEBUG] LLM评估输出: {'query_type': 'emergency', 'processing_mode': 'reactive', 'reasoning': '用户询问的是上证指数的实时表现，这是一个需要快速响应的市场信息查询。该问题不需要深度分析或特定领域知识的解读，但需要及时提供最新数据，因此属于紧急类查询并采用快速反应模式处理。'}
+[DEBUG] 分支判断: processing_mode=reactive, query_type=emergency
+[DEBUG] 进入节点: reactive_processing
+【处理模式: 反应式】- 快速响应简单查询
+
+=== 响应结果 ===
+
+{"status": "success", "data": {"index": "上证指数", "value": "3100.58", "change": "+15.23", "percent_change": "+0.49%", "time": "2023-10-12"}}
+
+处理用时: 5.26秒
+
+
+[DEBUG] 进入节点: assess_query
+[DEBUG] LLM评估输出: {'query_type': 'analytical', 'processing_mode': 'deliberative', 'reasoning': '用户询问如何根据当前市场情况调整投资组合以应对可能的经济衰退，这 涉及到对宏观经济形势的判断、资产配置策略的优化以及风险管理，需要综合多方面专业分析，因此属于需要深度分析的查询，适合采用深思熟虑的处理模式。'}
+[DEBUG] 分支判断: processing_mode=deliberative, query_type=analytical
+[DEBUG] 进入节点: collect_data
+[DEBUG] 进入节点: analyze_data
+
+1）低代码 Coze/Dify
+可视化，直观；
+2）高代码 LangChain, LangGraph, Qwen-Agent
+@之前代码.py 改成现在的需求
+
+
+
+DEBUG] 进入节点: assess_query
+[DEBUG] LLM评估输出: {'query_type': 'analytical', 'processing_mode': 'deliberative', 'reasoning': '用户询问如何根据当前市场情况调整投资组合以应对可能的经济衰退，这 涉及到对宏观经济形势的判断、资产配置策略的优化以及风险管理，需要综合多方面专业分析，因此属于需要深度分析的查询，适合采用深思熟虑的处理模式。'}
+[DEBUG] 分支判断: processing_mode=deliberative, query_type=analytical
+[DEBUG] 进入节点: collect_data
+[DEBUG] 进入节点: analyze_data
+[DEBUG] 进入节点: generate_recommendations
+
+LangGraph, Qwen-Agent
+1) 开源，有二开的可能性  => 要花一些精力
+Qwen-Agent 没有向量搜索， ES （关键词搜索，向量搜索）
+
+Q:问一个比较小白的问题。我想把我自己做的agent封装成网页给普通用户使用要怎么做
+qwen-agent，内置了gui
+
+        print("正在启动 Web 界面...")
+        # 初始化助手
+        bot = init_agent_service()
+        # 配置聊天界面，列举3个典型门票查询问题
+        chatbot_config = {
+            'prompt.suggestions': [
+                '2023年4、5、6月一日门票，二日门票的销量多少？帮我按照周进行统计',
+                '2023年7月的不同省份的入园人数统计',
+                '帮我查看2023年10月1-7日销售渠道订单金额排名',
+            ]
+        }
+        print("Web 界面准备就绪，正在启动服务...")
+        # 启动 Web 界面
+        WebUI(
+            bot,
+            chatbot_config=chatbot_config
+        ).run()
+
+Q：如果agent生成的东西，我想人工确认一下，然后再继续往下做 该怎么弄
+Qwen-Agent, Human
+
+Q：老师看下这个问题哈，大模型是怎么识别视频内容的？它会像人一样播放视频、看视频、去理解视频吗
+在下次课，会讲解到 视频大模型
+
+Q：老师，检测车距，然后控制制动，Agent是怎么实时检测的。定时触发？
+Yolo，tool => Agent调用
+
+Q：COZE或者DIFY平台里的第三方插件有没有可能做本地化部署？
+有可能，你看下它实现的逻辑，可以让Cursor 帮你进行实现，然后进行部署
+第三方插件（不一定是开源的）
+
+Q：老师，工作流可以动态调整整体流程，用来与战略目标保持一致。这个动态调整怎么理解？
+LangGraph可以实现更底层的逻辑
+workflow: A=>B=>C=>End
+动态调整workflow:
+A=>B=>C=>D => End
+
+Q：真实客户的项目里，用Qwen-Agent，也是调用DashScope吗？还是客户会自己租算力私有部署模型？
+私有化部署，DeepSeek-R1, Qwen3
+Qwen-Agent 可以调用私有化部署的模型；
+
+Q：部署需要我们开发吗
+实际项目中，如果我们想要用Qwen3，可能会让我们来进行开发
+
+Q：如果是gpt系模型, 老師建議用哪個?
+4.1, o3-mini，azure
+
+
+vllm 部署，都支持openai标准，qwen-agent 就可以调用了
+
+开发的过程：
+1）先把数据脱密 => cursor模拟生成一些数据
+2）用Qwen-Agent + DashScope进行开发 => POC，给客户展示
+3）迁移到客户的服务器
+vllm部署Qwen3 => API接口，支持openai协议 => Qwen-Agent在本地调用vllm qwen3模型
+
+
+
+
+
+
+
+
+
